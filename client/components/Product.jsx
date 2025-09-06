@@ -2,11 +2,15 @@
 import React, { useState } from "react";
 import { Heart, ChevronDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useCart } from "../context/CartContext";
 
 const Products = () => {
 	const [selectedCategory, setSelectedCategory] = useState("All Categories");
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const [favorites, setFavorites] = useState(new Set());
+
+	// Get addToCart function from context
+	const { addToCart } = useCart();
 
 	const categories = [
 		"All Categories",
@@ -129,6 +133,16 @@ const Products = () => {
 		setIsDropdownOpen(false);
 	};
 
+	const handleAddToCart = (product) => {
+		try {
+			addToCart(product);
+			// Optional: Add a success message or animation here
+			console.log("Item added to cart:", product.name);
+		} catch (error) {
+			console.error("Error adding to cart:", error);
+		}
+	};
+
 	return (
 		<section className="py-8 md:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 bg-white">
 			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 md:mb-12 gap-4">
@@ -139,7 +153,7 @@ const Products = () => {
 				<div className="relative w-full sm:w-auto">
 					<button
 						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-						className="flex items-center justify-between w-full sm:w-auto space-x-2 bg-gray-100 hover:bg-gray-200 px-4 md:px-6 py-2 md:py-3 rounded-lg min-w-0 sm:min-w-max">
+						className="flex items-center justify-between w-full sm:w-auto space-x-2 bg-gray-200 hover:bg-gray-200 px-4 md:px-6 py-2 md:py-3 rounded-lg min-w-0 sm:min-w-max">
 						<span className="text-gray-700 font-medium text-sm md:text-base truncate">
 							{selectedCategory === "All Categories"
 								? "Choose Category"
@@ -176,7 +190,7 @@ const Products = () => {
 			<div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
 				{displayProducts.map((product) => (
 					<div key={product.id} className="flex-shrink-0 w-72 sm:w-80">
-						<div className="bg-gray-50 rounded-2xl p-4 md:p-6 h-full flex flex-col">
+						<div className="bg-gray-100 rounded-2xl p-4 md:p-6 h-full flex flex-col">
 							<div className="flex items-center justify-between mb-3 md:mb-4">
 								{product.isBestSeller && (
 									<span className="bg-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium text-gray-700">
@@ -223,10 +237,16 @@ const Products = () => {
 								<p className="text-lg md:text-xl font-bold text-gray-900">
 									{product.price}
 								</p>
-
-								<button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm ">
-									Buy Now
-								</button>
+								<div className="flex justify-between gap-2 cursor-pointer">
+									<button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm ">
+										Buy Now
+									</button>
+									<button
+										onClick={() => handleAddToCart(product)}
+										className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm ">
+										Add to cart
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
