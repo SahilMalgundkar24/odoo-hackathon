@@ -1,8 +1,29 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// User model
-export const userSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now }
-});
+const baseUserSchema = {
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+};
+
+export const buyerSchema = new mongoose.Schema({
+  ...baseUserSchema,
+  type: {
+    type: String,
+    default: 'buyer'
+  }
+}, { collection: 'buyers' }); // Explicitly set collection name
+
+export const sellerSchema = new mongoose.Schema({
+  ...baseUserSchema,
+  type: {
+    type: String,
+    default: 'seller'
+  }
+}, { collection: 'sellers' }); // Explicitly set collection name

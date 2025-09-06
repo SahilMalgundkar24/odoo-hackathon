@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import multer from "multer";
 import cors from "cors";
-import { userSchema } from "./models/userModel.js";
+import { buyerSchema, sellerSchema } from "./models/userModel.js";
 
 dotenv.config();
 
@@ -40,20 +40,24 @@ mongoose
     console.error("Make sure you have a .env file with MONGO_SECRET defined");
   });
 
-const User = mongoose.model("User", userSchema);
+const Buyer = mongoose.model("Buyer", buyerSchema);
+const Seller = mongoose.model("Seller", sellerSchema);
 
 // Register endpoint
 app.post("/register", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, userType } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !userType) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "Email, password and user type are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    // Choose collection based on user type
+    const UserModel = userType === "buyer" ? Buyer : Seller;
+
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -61,15 +65,16 @@ app.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({
+    const user = new UserModel({
       email,
       password: hashedPassword,
+      type: userType,
     });
 
     await user.save();
 
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, userType },
       process.env.JWT_SECRET || "your_jwt_secret_key",
       { expiresIn: "30d" }
     );
@@ -77,6 +82,8 @@ app.post("/register", async (req, res) => {
     res.status(201).json({
       message: "User registered successfully",
       token,
+      userType,
+      success: true
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -87,15 +94,18 @@ app.post("/register", async (req, res) => {
 // Login endpoint
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, userType } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !userType) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "Email, password and user type are required" });
     }
 
-    const user = await User.findOne({ email });
+    // Choose collection based on user type
+    const UserModel = userType === "buyer" ? Buyer : Seller;
+
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -106,12 +116,17 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, userType },
       process.env.JWT_SECRET || "your_jwt_secret_key",
       { expiresIn: "30d" }
     );
 
-    res.json({ token });
+    res.status(201).json({
+      token,
+      userType,
+      success: true,
+      message: 'User logged in successfully'
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
