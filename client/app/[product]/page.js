@@ -5,8 +5,10 @@ import axios from "axios";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import ChatModal from "@/components/ChatModal";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter();
   const params = useParams();
   const productId = params.product;
 
@@ -126,7 +128,12 @@ const page = () => {
             <div className="border border-gray-600 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7">
               Add to Cart
             </div>
-            <div className="bg-green-500 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7 text-white">
+            <div
+              onClick={() => {
+                router.push("/buynow");
+              }}
+              className="bg-green-500 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7 text-white"
+            >
               Buy Now
             </div>
             <div

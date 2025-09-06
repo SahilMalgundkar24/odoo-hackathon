@@ -2,6 +2,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Pacifico } from "next/font/google";
+
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -48,7 +54,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <h1
+        className={`${pacifico.className} text-4xl mb-6 hover:opacity-70 transition-opacity cursor-pointer`}
+      >
+        EcoFind
+      </h1>
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-center text-3xl font-bold">Login</h2>
 
