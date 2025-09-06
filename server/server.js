@@ -10,6 +10,8 @@ dotenv.config();
 
 const app = express();
 const upload = multer();
+const PORT = 3030;
+
 
 // Middleware
 app.use(upload.none());
@@ -100,7 +102,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
