@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,12 +22,12 @@ export default function LoginPage() {
     e.preventDefault();
     console.log("Form data:", formData);
     axios
-      .post("http://localhost:3030/login", formData)
+      .post("http://localhost:3030/register", formData)
       .then((response) => {
         console.log("Success:", response.data);
         if (response.data.success) {
           Cookies.set('token', response.data.token, { expires: 30 }); // Token expires in 30 days
-          alert("Login successful!");
+          alert("Registration successful!");
           window.location.href = "/";
         }
       })
@@ -39,7 +39,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-center text-3xl font-bold">Login</h2>
+        <h2 className="text-center text-3xl font-bold">Register</h2>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
@@ -103,7 +103,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700"
           >
-            Sign in
+            Register
           </button>
         </form>
       </div>
