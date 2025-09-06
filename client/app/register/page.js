@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
+import Cookies from 'js-cookie';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -25,12 +26,13 @@ export default function RegisterPage() {
       .then((response) => {
         console.log("Success:", response.data);
         if (response.data.success) {
+          Cookies.set('token', response.data.token, { expires: 30 }); // Token expires in 30 days
           alert("Registration successful!");
           window.location.href = "/";
         }
       })
       .catch((error) => {
-        console.error("There was an error!", error);
+        alert.error("There was an error!", error);
       });
   };
 
