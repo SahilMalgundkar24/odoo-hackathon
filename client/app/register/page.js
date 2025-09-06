@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
     userType: "buyer", // default value
@@ -22,17 +23,29 @@ export default function RegisterPage() {
     e.preventDefault();
     console.log("Form data:", formData);
     axios
-      .post("http://localhost:3030/register", formData)
+      .post("http://localhost:3030/api/register", formData)
       .then((response) => {
         console.log("Success:", response.data);
         if (response.data.success) {
-          Cookies.set('token', response.data.token, { expires: 30 }); // Token expires in 30 days
-          alert("Registration successful!");
+          Cookies.set("token", response.data.token, { expires: 30 }); // Token expires in 30 days
+          if (response.data.username) {
+            Cookies.set("username", response.data.username, { expires: 30 });
+          }
+          alert(
+            `Registration successful! Welcome, ${
+              response.data.username || "User"
+            }!`
+          );
           window.location.href = "/";
         }
       })
       .catch((error) => {
-        alert.error("There was an error!", error);
+        console.log("There was an error!", error);
+        if (error.response && error.response.data) {
+          alert(`Registration failed: ${error.response.data.message}`);
+        } else {
+          alert("Registration failed. Please try again.");
+        }
       });
   };
 
@@ -43,6 +56,27 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                minLength={3}
+                maxLength={30}
+                value={formData.username}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                placeholder="Enter your username"
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="email"

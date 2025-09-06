@@ -24,5 +24,8 @@ yarn-error.log*
 server/dist/
 server/build/
 
+# Uploaded files
+server/uploads/
+
 # Mac / OS
 .DS_Store
