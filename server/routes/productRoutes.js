@@ -252,6 +252,54 @@ const createProductRoutes = (upload) => {
     }
   });
 
+  // Get single product by ID (public route - no authentication required)
+  router.get("/products/:productId", async (req, res) => {
+    try {
+      const { productId } = req.params;
+
+      // Validate productId format
+      if (!productId.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({
+          message: "Invalid product ID format",
+          success: false,
+        });
+      }
+
+      const product = await Product.findById(productId).populate(
+        "sellerId",
+        "username email"
+      );
+
+      if (!product) {
+        return res.status(404).json({
+          message: "Product not found",
+          success: false,
+        });
+      }
+
+      // Add image URLs to the product
+      const productWithUrls = {
+        ...product.toObject(),
+        images: product.images.map((image, index) => ({
+          ...image,
+          url: `/api/products/${product._id}/images/${index}`,
+        })),
+      };
+
+      res.status(200).json({
+        message: "Product retrieved successfully",
+        success: true,
+        product: productWithUrls,
+      });
+    } catch (error) {
+      console.error("Get single product error:", error);
+      res.status(500).json({
+        message: "Server error while retrieving product",
+        success: false,
+      });
+    }
+  });
+
   // Serve product images (base64 data)
   router.get("/products/:productId/images/:imageIndex", async (req, res) => {
     try {

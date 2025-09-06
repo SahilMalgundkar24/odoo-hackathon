@@ -227,9 +227,12 @@ const Products = () => {
                     ₹{product.price}
                   </p>
                   <div className="flex justify-between gap-2 cursor-pointer">
-                    <button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm ">
+                    <Link
+                      href={`/${product._id}`}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm text-center"
+                    >
                       Buy Now
-                    </button>
+                    </Link>
                     <button
                       onClick={() => handleAddToCart(product)}
                       className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm "
