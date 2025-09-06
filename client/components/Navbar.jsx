@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { MdOutlineShoppingCart } from "react-icons/md";
+import CartModal from "./CartModal";
 
 const Navbar = () => {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+  };
+
   return (
     <div className="flex items-center justify-between">
       <div className="w-1/3">
@@ -30,9 +37,18 @@ const Navbar = () => {
           </span>
         </div>
         <div>
-          <MdOutlineShoppingCart size={30} className="ml-7" color="#909090" />
+          <button
+            suppressHydrationWarning
+            onClick={toggleCart}
+            className="ml-7 hover:opacity-70 transition-opacity cursor-pointer"
+          >
+            <MdOutlineShoppingCart size={30} color="#909090" />
+          </button>
         </div>
       </div>
+
+      {/* Cart Modal */}
+      <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 };
