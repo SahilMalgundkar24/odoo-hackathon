@@ -8,7 +8,6 @@ export default function RegisterPage() {
     username: "",
     email: "",
     password: "",
-    userType: "buyer", // default value
   });
 
   const handleInputChange = (e) => {
@@ -111,25 +110,6 @@ export default function RegisterPage() {
                 onChange={handleInputChange}
                 className="mt-1 block w-full rounded-md border border-gray-300 p-2"
               />
-            </div>
-
-            <div>
-              <label
-                htmlFor="userType"
-                className="block text-sm font-medium text-gray-700"
-              >
-                I am a
-              </label>
-              <select
-                id="userType"
-                name="userType"
-                value={formData.userType}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-              >
-                <option value="buyer">Buyer</option>
-                <option value="seller">Seller</option>
-              </select>
             </div>
           </div>
 

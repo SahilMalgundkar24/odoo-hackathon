@@ -1,11 +1,9 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import { Product } from "../models/productModel.js";
-import { sellerSchema } from "../models/userModel.js";
+import { User } from "../models/userModel.js";
 
 const router = express.Router();
-const Seller = mongoose.model("Seller", sellerSchema);
 
 // Function to create router with upload configuration
 const createProductRoutes = (upload) => {
@@ -26,8 +24,9 @@ const createProductRoutes = (upload) => {
         token,
         process.env.JWT_SECRET || "your_jwt_secret_key"
       );
-      // Verify the user exists and is a seller
-      const user = await Seller.findById(decoded.userId);
+
+      // Verify the user exists
+      const user = await User.findById(decoded.userId);
       if (!user) {
         return res.status(403).json({
           message: "Invalid token or user not found",
@@ -35,16 +34,8 @@ const createProductRoutes = (upload) => {
         });
       }
 
-      if (decoded.userType !== "seller") {
-        return res.status(403).json({
-          message: "Access denied. Only sellers can create products",
-          success: false,
-        });
-      }
-
       req.user = {
         userId: decoded.userId,
-        userType: decoded.userType,
       };
 
       next();
@@ -173,7 +164,7 @@ const createProductRoutes = (upload) => {
   router.get("/products", async (req, res) => {
     try {
       const products = await Product.find()
-        .populate("sellerId", "email type")
+        .populate("sellerId", "username email")
         .sort({ createdAt: -1 });
 
       // Add image URLs to each product
