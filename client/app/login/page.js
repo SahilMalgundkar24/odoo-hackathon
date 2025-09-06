@@ -1,43 +1,48 @@
-'use client';
-import React, { useState } from 'react';
-import axios from 'axios';
+"use client";
+import React, { useState } from "react";
+import axios from "axios";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    userType: 'buyer' // default value
+    email: "",
+    password: "",
+    userType: "buyer", // default value
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form data:', formData);
-    axios.post('http://localhost:3000/api/login', formData)
-    .then(response => {response.json()
-      console.log('Success:', response);
-    })
-    .catch(error => {
-      console.error('There was an error!', error);
-    });
+    console.log("Form data:", formData);
+    axios
+      .post("http://localhost:3030/login", formData)
+      .then((response) => {
+        response.json();
+        console.log("Success:", response);
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+      });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <h2 className="text-center text-3xl font-bold">Login</h2>
-        
+
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <input
@@ -52,7 +57,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -67,7 +75,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="userType"
+                className="block text-sm font-medium text-gray-700"
+              >
                 I am a
               </label>
               <select
