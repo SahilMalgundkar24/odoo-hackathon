@@ -4,6 +4,7 @@ import axios from "axios";
 import { Heart, ChevronDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
+import { useRouter } from "next/navigation";
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");

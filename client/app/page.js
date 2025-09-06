@@ -11,7 +11,7 @@ export default function Home() {
   const router = useRouter();
   return (
     <>
-    <CartProvider>
+      <CartProvider>
         <div className="w-full h-full">
           <div className="lg:px-16 px-5 py-5">
             <Navbar />
@@ -22,13 +22,13 @@ export default function Home() {
         <div className="fixed bottom-7 right-7 z-30">
           <div
             onClick={() => router.push("/seller")}
-            className="border border-gray-400 py-4 px-7 gap-3 text-sm rounded-full flex items-center justify-center bg-white cursor-pointer"
+            className="border border-gray-400 py-4 px-7 gap-3 text-sm text-white rounded-full flex items-center justify-center bg-black cursor-pointer"
           >
             Sell your stuff
             <FiArrowRight />
           </div>
         </div>
-    </CartProvider>
+      </CartProvider>
     </>
   );
 }
