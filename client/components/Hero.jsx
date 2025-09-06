@@ -1,7 +1,13 @@
 import React from "react";
+import { Button } from "./ui/button";
 
 const Hero = () => {
-  return <div>Hero</div>;
+  return (
+    <>
+      <h1>Hero</h1>
+      <Button suppressHydrationWarning>Click me</Button>
+    </>
+  );
 };
 
 export default Hero;
