@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCart } from "../../context/CartContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const AllProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -149,14 +150,12 @@ const AllProducts = () => {
                   </p>
 
                   <div className="flex justify-between gap-2">
-                    <button
-                      onClick={() => {
-                        router.push("/buynow");
-                      }}
-                      className="cursor-pointer w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm"
+                    <Link
+                      href={`/${product._id}`}
+                      className="cursor-pointer w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm text-center"
                     >
                       Buy Now
-                    </button>
+                    </Link>
                     <button
                       onClick={() => handleAddToCart(product)}
                       className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm"
