@@ -23,6 +23,12 @@ mongoose.connect(process.env.MONGO_SECRET)
 const User = mongoose.model('User', userSchema);
 
 // Register endpoint
+app.use('/api', (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.post('/register', async (req, res) => {
     try {
         const { email, password } = req.body;
