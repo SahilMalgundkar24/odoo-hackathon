@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <div className="w-full h-full">
-        <div className="lg:px-16 px-5 py-3">
+        <div className="lg:px-16 px-5 py-5">
           <Navbar />
           <Hero />
         </div>

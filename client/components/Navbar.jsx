@@ -4,6 +4,7 @@ import { MdOutlineShoppingCart } from "react-icons/md";
 import { HiMenu, HiX } from "react-icons/hi";
 import CartModal from "./CartModal";
 import { Pacifico } from "next/font/google";
+import { useRouter } from "next/navigation";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -13,6 +14,7 @@ const pacifico = Pacifico({
 const Navbar = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
@@ -21,20 +23,50 @@ const Navbar = () => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  const handleNavigation = (path) => {
+    router.push(path);
+    setIsMobileMenuOpen(false);
+  };
   return (
     <>
       {/* Desktop Navbar */}
       <div className="hidden md:flex items-center justify-between pb-3">
         <div className="w-1/3">
           <div>
-            <h1 className={`${pacifico.className} text-2xl`}>EcoFinds</h1>
+            <button
+              onClick={() => router.push("/")}
+              className={`${pacifico.className} text-2xl hover:opacity-70 transition-opacity cursor-pointer`}
+            >
+              EcoFinds
+            </button>
           </div>
         </div>
         <div className="w-1/3 flex justify-center items-center gap-7">
-          <h1 className="text-sm">Home</h1>
-          <h1 className="text-sm">Explore</h1>
-          <h1 className="text-sm">Rental Machines</h1>
-          <h1 className="text-sm">Workshops</h1>
+          <button
+            onClick={() => router.push("/")}
+            className="text-sm hover:text-gray-600 transition-colors cursor-pointer"
+          >
+            Home
+          </button>
+          <button
+            onClick={() => router.push("/allproducts")}
+            className="text-sm hover:text-gray-600 transition-colors cursor-pointer"
+          >
+            Explore
+          </button>
+          <button
+            onClick={() => router.push("/rentalproducts")}
+            className="text-sm hover:text-gray-600 transition-colors cursor-pointer"
+          >
+            Rental Machines
+          </button>
+          <button
+            onClick={() => router.push("/profile")}
+            className="text-sm hover:text-gray-600 transition-colors cursor-pointer"
+          >
+            Profile
+          </button>
         </div>
 
         <div className="w-1/3 flex items-center justify-end">
@@ -65,7 +97,12 @@ const Navbar = () => {
       <div className="md:hidden flex items-center justify-between pb-3">
         {/* Logo */}
         <div>
-          <h1 className={`${pacifico.className} text-xl`}>EcoFinds</h1>
+          <button
+            onClick={() => router.push("/")}
+            className={`${pacifico.className} text-xl hover:opacity-70 transition-opacity cursor-pointer`}
+          >
+            EcoFinds
+          </button>
         </div>
 
         {/* Right side - Cart and Hamburger */}
@@ -129,34 +166,30 @@ const Navbar = () => {
 
               {/* Navigation Links */}
               <nav className="space-y-4">
-                <a
-                  href="#"
-                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors"
-                  onClick={toggleMobileMenu}
+                <button
+                  onClick={() => handleNavigation("/")}
+                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors text-left w-full"
                 >
                   Home
-                </a>
-                <a
-                  href="#"
-                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors"
-                  onClick={toggleMobileMenu}
+                </button>
+                <button
+                  onClick={() => handleNavigation("/allproducts")}
+                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors text-left w-full"
                 >
                   Explore
-                </a>
-                <a
-                  href="#"
-                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors"
-                  onClick={toggleMobileMenu}
+                </button>
+                <button
+                  onClick={() => handleNavigation("/rentalproducts")}
+                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors text-left w-full"
                 >
                   Rental Machines
-                </a>
-                <a
-                  href="#"
-                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors"
-                  onClick={toggleMobileMenu}
+                </button>
+                <button
+                  onClick={() => handleNavigation("/profile")}
+                  className="block text-lg font-medium text-gray-800 hover:text-gray-600 transition-colors text-left w-full"
                 >
-                  Workshops
-                </a>
+                  Profile
+                </button>
               </nav>
             </div>
           </div>
