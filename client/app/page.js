@@ -2,15 +2,15 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
   return (
     <>
-      <div className="px-16 py-5">
+      <div className="w-full h-full">
         <Navbar />
         <Hero />
+        <Products />
       </div>
       <div className="absolute bottom-7 right-7">
         <div
