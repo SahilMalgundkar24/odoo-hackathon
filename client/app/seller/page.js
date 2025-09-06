@@ -135,7 +135,7 @@ const page = () => {
   };
 
   return (
-    <div className="px-16 py-5">
+    <div className="lg:px-16 px-5 py-5">
       <Navbar />
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Seller Page</h1>

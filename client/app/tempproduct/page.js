@@ -25,10 +25,10 @@ const page = () => {
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
 
   return (
-    <div className="px-16 py-5">
+    <div className="lg:px-16 px-5 py-5">
       <Navbar />
-      <div className="w-full mt-16 flex justify-between gap-7">
-        <div className="w-1/2">
+      <div className="w-full mt-16 flex lg:flex-row flex-col justify-between gap-7">
+        <div className="lg:w-1/2 w-full">
           {/* Main Image Display */}
           <div
             className={`w-full h-96 ${selectedImage.color} rounded-lg mb-4 flex items-center justify-center`}
@@ -55,21 +55,21 @@ const page = () => {
             ))}
           </div>
         </div>
-        <div className="w-1/2 h-96 flex flex-col justify-between">
+        <div className="lg:w-1/2 w-full lg:h-96 flex flex-col justify-between">
           <div>
             <h1 className="text-3xl font-bold">{product.title}</h1>
             <p className="text-gray-500 mt-4">{product.description}</p>
             <p className="font-bold text-4xl mt-4">₹{product.price}</p>
           </div>
-          <div className="flex gap-4">
-            <div className="border border-ggray-600 rounded-lg py-3 px-7">
+          <div className="flex lg:gap-4 gap-2 lg:mt-0 mt-5">
+            <div className="border border-gray-600 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7">
               Add to Cart
             </div>
-            <div className="bg-green-500 rounded-lg py-3 px-7 text-white">
+            <div className="bg-green-500 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7 text-white">
               Buy Now
             </div>
             <div
-              className="bg-amber-200 rounded-lg py-3 px-7 cursor-pointer hover:bg-amber-300 transition-colors duration-200"
+              className="bg-amber-200 rounded-lg text-sm lg:text-base lg:py-3 py-2 px-4 lg:px-7 cursor-pointer hover:bg-amber-300 transition-colors duration-200"
               onClick={() => setIsChatModalOpen(true)}
             >
               Negotiate with the seller
