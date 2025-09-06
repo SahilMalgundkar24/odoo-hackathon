@@ -57,6 +57,8 @@ const page = () => {
     "Electronics",
   ];
 
+  const ans = ["Yes", "No"];
+
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -300,6 +302,22 @@ const page = () => {
                 {errors.category && (
                   <p className="text-sm text-red-500">{errors.category}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Is it a rental Machine</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Answer" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    {ans.map((ans) => (
+                      <SelectItem key={ans} value={ans}>
+                        {ans}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Images Upload */}
