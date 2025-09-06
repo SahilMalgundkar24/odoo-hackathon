@@ -220,7 +220,7 @@ const page = () => {
                   >
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
