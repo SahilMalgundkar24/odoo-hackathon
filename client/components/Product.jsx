@@ -10,7 +10,6 @@ const Products = () => {
 
 	const categories = [
 		"All Categories",
-		"Miscellaneous",
 		"Automotive",
 		"Toys",
 		"Books & Stationery",
@@ -233,22 +232,20 @@ const Products = () => {
 					</div>
 				))}
 
-				{filteredProducts.length > 5 && (
-					<div className="flex-shrink-0 w-72">
-						<div className="rounded-2xl p-4 h-full flex items-center justify-center">
-							<Link
-								href="/allproducts"
-								className="flex flex-col items-center space-y-3 md:space-y-4 text-gray-600 hover:text-gray-900 transition-colors duration-200 group">
-								<div className="w-12 h-12 bg-white rounded-full flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white">
-									<ArrowRight className="w-5 h-5" />
-								</div>
-								<div className="text-center font-semibold text-base md:text-lg hover:underline">
-									See More products
-								</div>
-							</Link>
-						</div>
+				<div className="flex-shrink-0 w-72">
+					<div className="rounded-2xl p-4 h-full flex items-center justify-center">
+						<Link
+							href="/allproducts"
+							className="flex flex-col items-center space-y-3 md:space-y-4 text-gray-600 hover:text-gray-900 transition-colors duration-200 group">
+							<div className="w-12 h-12 bg-white rounded-full flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white">
+								<ArrowRight className="w-5 h-5" />
+							</div>
+							<div className="text-center font-semibold text-base md:text-lg hover:underline">
+								See More products
+							</div>
+						</Link>
 					</div>
-				)}
+				</div>
 			</div>
 		</section>
 	);

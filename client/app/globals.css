@@ -1,17 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Asimovian&display=swap");
 @import "tailwindcss";
 
 .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.logo-font {
+  font-family: "Asimovian", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
