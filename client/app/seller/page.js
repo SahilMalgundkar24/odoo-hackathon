@@ -1,5 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 import Navbar from "@/components/Navbar";
 import {
   Card,
@@ -33,6 +35,16 @@ const page = () => {
 
   const [errors, setErrors] = useState({});
   const [dragActive, setDragActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (!token) {
+      window.location.href = "/login";
+    }
+  }, []);
 
   const categories = [
     "Miscellaneous",
@@ -124,13 +136,70 @@ const page = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
-      // Handle form submission here
-      alert("Product submitted successfully!");
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage("");
+
+    try {
+      // Get the JWT token from cookies
+      const token = Cookies.get("token");
+      if (!token) {
+        setSubmitMessage("Please log in to create a product");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.productName);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("category", formData.category);
+
+      // Append images to FormData
+      formData.images.forEach((file, index) => {
+        formDataToSend.append("images", file);
+      });
+
+      // Make API call
+      const response = await axios.post(
+        "http://localhost:3030/api/products",
+        formDataToSend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setSubmitMessage("Product created successfully!");
+        // Reset form
+        setFormData({
+          productName: "",
+          description: "",
+          price: "",
+          category: "",
+          images: [],
+        });
+        setErrors({});
+      }
+    } catch (error) {
+      console.error("Error creating product:", error);
+      if (error.response && error.response.data) {
+        setSubmitMessage(`Error: ${error.response.data.message}`);
+      } else {
+        setSubmitMessage("Failed to create product. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -305,9 +374,34 @@ const page = () => {
                 )}
               </div>
 
+              {/* Submit Message */}
+              {submitMessage && (
+                <Alert
+                  className={
+                    submitMessage.includes("Error")
+                      ? "border-red-200"
+                      : "border-green-200"
+                  }
+                >
+                  <AlertDescription
+                    className={
+                      submitMessage.includes("Error")
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }
+                  >
+                    {submitMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Submit Button */}
-              <Button onClick={handleSubmit} className="w-full">
-                List Product
+              <Button
+                onClick={handleSubmit}
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating Product..." : "List Product"}
               </Button>
             </div>
           </CardContent>

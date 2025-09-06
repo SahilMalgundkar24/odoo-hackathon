@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -22,17 +22,29 @@ export default function LoginPage() {
     e.preventDefault();
     console.log("Form data:", formData);
     axios
-      .post("http://localhost:3030/login", formData)
+      .post("http://localhost:3030/api/login", formData)
       .then((response) => {
         console.log("Success:", response.data);
         if (response.data.success) {
-          Cookies.set('token', response.data.token, { expires: 30 }); // Token expires in 30 days
-          alert("Login successful!");
+          Cookies.set("token", response.data.token, { expires: 30 }); // Token expires in 30 days
+          if (response.data.username) {
+            Cookies.set("username", response.data.username, { expires: 30 });
+          }
+          alert(
+            `Login successful! Welcome back, ${
+              response.data.username || "User"
+            }!`
+          );
           window.location.href = "/";
         }
       })
       .catch((error) => {
-        alert.error("There was an error!", error);
+        console.log("There was an error!", error);
+        if (error.response && error.response.data) {
+          alert(`Login failed: ${error.response.data.message}`);
+        } else {
+          alert("Login failed. Please try again.");
+        }
       });
   };
 
