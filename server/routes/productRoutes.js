@@ -163,7 +163,15 @@ const createProductRoutes = (upload) => {
   // Get all products (public route - no authentication required)
   router.get("/products", async (req, res) => {
     try {
-      const products = await Product.find()
+      const { category } = req.query;
+
+      // Build query object
+      const query = {};
+      if (category) {
+        query.category = category;
+      }
+
+      const products = await Product.find(query)
         .populate("sellerId", "username email")
         .sort({ createdAt: -1 });
 
@@ -177,14 +185,38 @@ const createProductRoutes = (upload) => {
       }));
 
       res.status(200).json({
-        message: "Products retrieved successfully",
+        message: category
+          ? `Products retrieved successfully for category: ${category}`
+          : "Products retrieved successfully",
         success: true,
         products: productsWithUrls,
+        category: category || null,
+        count: productsWithUrls.length,
       });
     } catch (error) {
       console.error("Get products error:", error);
       res.status(500).json({
         message: "Server error while retrieving products",
+        success: false,
+      });
+    }
+  });
+
+  // Get all available categories
+  router.get("/products/categories", async (req, res) => {
+    try {
+      const categories = await Product.distinct("category");
+
+      res.status(200).json({
+        message: "Categories retrieved successfully",
+        success: true,
+        categories: categories.sort(),
+        count: categories.length,
+      });
+    } catch (error) {
+      console.error("Get categories error:", error);
+      res.status(500).json({
+        message: "Server error while retrieving categories",
         success: false,
       });
     }

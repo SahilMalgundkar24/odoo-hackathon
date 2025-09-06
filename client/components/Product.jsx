@@ -1,19 +1,23 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Heart, ChevronDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 
 const Products = () => {
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Get addToCart function from context
   const { addToCart } = useCart();
 
+  // Hardcoded categories
   const categories = [
     "All Categories",
     "Automotive",
@@ -25,98 +29,59 @@ const Products = () => {
     "Electronics",
   ];
 
-  // Sample products data
-  const allProducts = [
-    {
-      id: 1,
-      name: 'Dunk High "Green Satin" Sneakers',
-      brand: "Nike",
-      price: "$180.00",
-      image:
-        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&crop=center",
-      category: "Fashion & Clothing",
-      isBestSeller: true,
-    },
-    {
-      id: 2,
-      name: "Vintage Leather Jacket",
-      brand: "Fashion Co",
-      price: "$95.00",
-      image:
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop&crop=center",
-      category: "Fashion & Clothing",
-      isBestSeller: false,
-    },
-    {
-      id: 3,
-      name: 'MacBook Pro 13"',
-      brand: "Apple",
-      price: "$1299.00",
-      image:
-        "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop&crop=center",
-      category: "Electronics",
-      isBestSeller: true,
-    },
-    {
-      id: 4,
-      name: "Wooden Coffee Table",
-      brand: "Home Decor",
-      price: "$150.00",
-      image:
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop&crop=center",
-      category: "Home & Living",
-      isBestSeller: false,
-    },
-    {
-      id: 5,
-      name: "Car Dashboard Camera",
-      brand: "TechCar",
-      price: "$89.00",
-      image:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop&crop=center",
-      category: "Automotive",
-      isBestSeller: true,
-    },
-    {
-      id: 6,
-      name: "Children's Building Blocks",
-      brand: "PlayTime",
-      price: "$25.00",
-      image:
-        "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?w=400&h=400&fit=crop&crop=center",
-      category: "Toys",
-      isBestSeller: false,
-    },
-    {
-      id: 7,
-      name: "Notebook Set",
-      brand: "StudyCorp",
-      price: "$15.00",
-      image:
-        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop&crop=center",
-      category: "Books & Stationery",
-      isBestSeller: false,
-    },
-    {
-      id: 8,
-      name: "Handmade Pottery Vase",
-      brand: "Artisan",
-      price: "$45.00",
-      image:
-        "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop&crop=center",
-      category: "Handicrafts & Art",
-      isBestSeller: false,
-    },
-  ];
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
 
-  // Filter products based on selected category
-  const filteredProducts =
-    selectedCategory === "All Categories"
-      ? allProducts
-      : allProducts.filter((product) => product.category === selectedCategory);
+        // Fetch products
+        const productsResponse = await axios.get(
+          "http://localhost:3030/api/products"
+        );
+        if (productsResponse.data.success) {
+          setProducts(productsResponse.data.products);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Fetch products when category changes
+  useEffect(() => {
+    const fetchProductsByCategory = async () => {
+      try {
+        setLoading(true);
+        const url =
+          selectedCategory === "All Categories"
+            ? "http://localhost:3030/api/products"
+            : `http://localhost:3030/api/products?category=${encodeURIComponent(
+                selectedCategory
+              )}`;
+
+        const response = await axios.get(url);
+        if (response.data.success) {
+          setProducts(response.data.products);
+        }
+      } catch (error) {
+        console.error("Error fetching products by category:", error);
+        setError("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductsByCategory();
+  }, [selectedCategory]);
 
   // Show only first 5 products
-  const displayProducts = filteredProducts.slice(0, 5);
+  const displayProducts = products.slice(0, 5);
 
   const toggleFavorite = (productId) => {
     setFavorites((prev) => {
@@ -191,94 +156,109 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
-        {displayProducts.map((product) => (
-          <div key={product.id} className="flex-shrink-0 w-72 sm:w-80">
-            <div className="bg-gray-100 rounded-2xl p-4 md:p-6 h-full flex flex-col">
-              <div className="flex items-center justify-between mb-3 md:mb-4">
-                {product.isBestSeller && (
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-gray-500">Loading products...</div>
+        </div>
+      ) : error ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-red-500">{error}</div>
+        </div>
+      ) : (
+        <div className="flex gap-4 md:gap-6 overflow-x-auto pb-4 scrollbar-hide">
+          {displayProducts.map((product) => (
+            <div key={product._id} className="flex-shrink-0 w-72 sm:w-80">
+              <div className="bg-gray-100 rounded-2xl p-4 md:p-6 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
                   <span className="bg-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium text-gray-700">
-                    Best Seller
+                    {product.category}
                   </span>
-                )}
-                <button
-                  onClick={() => toggleFavorite(product.id)}
-                  className="ml-auto p-2 hover:bg-white rounded-full transition-colors duration-200"
-                >
-                  <Heart
-                    className={`w-4 h-4 md:w-5 md:h-5 ${
-                      favorites.has(product.id)
-                        ? "fill-red-500 text-red-500"
-                        : "text-gray-400"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="relative mb-4 md:mb-6 flex-grow">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-40 sm:h-48 object-cover rounded-lg"
-                />
-
-                <div className="flex justify-center mt-3 md:mt-4 space-x-2">
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-500 rounded-full"></div>
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-300 rounded-full"></div>
-                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gray-300 rounded-full"></div>
+                  <button
+                    onClick={() => toggleFavorite(product._id)}
+                    className="ml-auto p-2 hover:bg-white rounded-full transition-colors duration-200"
+                  >
+                    <Heart
+                      className={`w-4 h-4 md:w-5 md:h-5 ${
+                        favorites.has(product._id)
+                          ? "fill-red-500 text-red-500"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
                 </div>
-              </div>
 
-              <div className="space-y-2 md:space-y-3 mt-auto">
-                <div>
-                  <p className="text-xs md:text-sm text-gray-500 font-medium">
-                    {product.brand}
+                <div className="relative mb-4 md:mb-6 flex-grow">
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={`http://localhost:3030${product.images[0].url}`}
+                      alt={product.name}
+                      className="w-full h-40 sm:h-48 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-40 sm:h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-center mt-3 md:mt-4 space-x-2">
+                    {product.images &&
+                      product.images.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${
+                            index === 0 ? "bg-green-500" : "bg-gray-300"
+                          }`}
+                        ></div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2 md:space-y-3 mt-auto">
+                  <div>
+                    <p className="text-xs md:text-sm text-gray-500 font-medium">
+                      {product.sellerId?.username || "Unknown Seller"}
+                    </p>
+                    <h3 className="font-semibold text-gray-900 text-base md:text-lg leading-tight line-clamp-2">
+                      {product.name}
+                    </h3>
+                  </div>
+
+                  <p className="text-lg md:text-xl font-bold text-gray-900">
+                    ₹{product.price}
                   </p>
-                  <h3 className="font-semibold text-gray-900 text-base md:text-lg leading-tight line-clamp-2">
-                    {product.name}
-                  </h3>
-                </div>
-
-                <p className="text-lg md:text-xl font-bold text-gray-900">
-                  {product.price}
-                </p>
-                <div className="flex justify-between gap-2 cursor-pointer">
-                  <button
-                    onClick={() => {
-                      router.push("/buynow");
-                    }}
-                    className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm "
-                  >
-                    Buy Now
-                  </button>
-                  <button
-                    onClick={() => handleAddToCart(product)}
-                    className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm "
-                  >
-                    Add to cart
-                  </button>
+                  <div className="flex justify-between gap-2 cursor-pointer">
+                    <button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm ">
+                      Buy Now
+                    </button>
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-lg font-medium transition-colors duration-200 text-sm "
+                    >
+                      Add to cart
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        <div className="flex-shrink-0 w-72">
-          <div className="rounded-2xl p-4 h-full flex items-center justify-center">
-            <Link
-              href="/allproducts"
-              className="flex flex-col items-center space-y-3 md:space-y-4 text-gray-600 hover:text-gray-900 transition-colors duration-200 group"
-            >
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white">
-                <ArrowRight className="w-5 h-5" />
-              </div>
-              <div className="text-center font-semibold text-base md:text-lg hover:underline">
-                See More products
-              </div>
-            </Link>
+          <div className="flex-shrink-0 w-72">
+            <div className="rounded-2xl p-4 h-full flex items-center justify-center">
+              <Link
+                href="/allproducts"
+                className="flex flex-col items-center space-y-3 md:space-y-4 text-gray-600 hover:text-gray-900 transition-colors duration-200 group"
+              >
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+                <div className="text-center font-semibold text-base md:text-lg hover:underline">
+                  See More products
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };

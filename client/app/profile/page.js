@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,16 @@ import {
   MapPin,
   X,
   Trash2,
+  Loader2,
 } from "lucide-react";
 
-const page = () => {
+const ProfilePage = () => {
   const [userRole, setUserRole] = useState("buyer");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [listedProducts, setListedProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Mock data for purchased products (buyer view)
   const purchasedProducts = [
@@ -60,58 +65,73 @@ const page = () => {
     },
   ];
 
-  // Mock data for listed products (seller view)
-  const [listedProducts, setListedProducts] = useState([
-    {
-      id: 1,
-      name: "Vintage Leather Jacket",
-      brand: "Fashion Co",
-      price: "95.00",
-      description:
-        "A classic vintage leather jacket with authentic distressed finish. Perfect for adding a timeless edge to any outfit. Made from premium quality leather with excellent craftsmanship.",
-      image:
-        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop&crop=center",
-      views: 245,
-      sales: 3,
-      status: "Active",
-      listedDate: "2024-01-12",
-    },
-    {
-      id: 2,
-      name: "Wooden Coffee Table",
-      brand: "Home Decor",
-      price: "150.00",
-      description:
-        "Beautiful handcrafted wooden coffee table made from reclaimed oak. Features a natural wood finish and sturdy construction. Perfect centerpiece for your living room.",
-      image:
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop&crop=center",
-      views: 189,
-      sales: 1,
-      status: "Active",
-      listedDate: "2024-01-08",
-    },
-    {
-      id: 3,
-      name: "Handmade Pottery Vase",
-      brand: "Artisan",
-      price: "45.00",
-      description:
-        "Unique handmade pottery vase created by local artisans. Each piece is one-of-a-kind with beautiful glazing and organic shapes. Perfect for home decoration or as a gift.",
-      image:
-        "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop&crop=center",
-      views: 156,
-      sales: 0,
-      status: "Active",
-      listedDate: "2024-01-03",
-    },
-  ]);
+  // Fetch user's products from the backend
+  const fetchUserProducts = async () => {
+    setLoading(true);
+    setError(null);
 
-  // Mock analytics data for seller
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        setError("No authentication token found. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        "http://localhost:3030/api/products/seller",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          setError("Authentication failed. Please log in again.");
+          Cookies.remove("token");
+        } else {
+          setError("Failed to fetch products. Please try again.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setListedProducts(data.products || []);
+      } else {
+        setError(data.message || "Failed to fetch products");
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch products when component mounts or when switching to seller view
+  useEffect(() => {
+    if (userRole === "seller") {
+      fetchUserProducts();
+    }
+  }, [userRole]);
+
+  // Calculate analytics from fetched products
   const sellerAnalytics = {
-    totalSales: 4,
-    totalRevenue: "290.00",
-    totalViews: 590,
-    averageRating: 4.8,
+    totalSales: listedProducts.length, // This would need to be calculated from actual sales data
+    totalRevenue: listedProducts
+      .reduce((sum, product) => sum + parseFloat(product.price), 0)
+      .toFixed(2),
+    totalViews: listedProducts.reduce(
+      (sum, product) => sum + (product.views || 0),
+      0
+    ),
+    averageRating: 4.8, // This would need to be calculated from actual ratings
   };
 
   // Modal functions
@@ -125,11 +145,39 @@ const page = () => {
     setSelectedProduct(null);
   };
 
-  const deleteProduct = (productId) => {
-    setListedProducts((prev) =>
-      prev.filter((product) => product.id !== productId)
-    );
-    closeModal();
+  const deleteProduct = async (productId) => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        setError("No authentication token found. Please log in.");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3030/api/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Remove product from local state
+        setListedProducts((prev) =>
+          prev.filter((product) => product._id !== productId)
+        );
+        closeModal();
+      } else {
+        const data = await response.json();
+        setError(data.message || "Failed to delete product");
+      }
+    } catch (err) {
+      console.error("Error deleting product:", err);
+      setError("Network error. Please try again.");
+    }
   };
 
   const BuyerDashboard = () => (
@@ -193,6 +241,25 @@ const page = () => {
 
   const SellerDashboard = () => (
     <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 text-red-600">
+              <span className="text-sm">{error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setError(null)}
+                className="ml-auto"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
@@ -202,9 +269,11 @@ const page = () => {
                 <Package className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Sales</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Products
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sellerAnalytics.totalSales}
+                  {listedProducts.length}
                 </p>
               </div>
             </div>
@@ -218,11 +287,9 @@ const page = () => {
                 <DollarSign className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total Revenue
-                </p>
+                <p className="text-sm font-medium text-gray-600">Total Value</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sellerAnalytics.totalRevenue}
+                  ₹{sellerAnalytics.totalRevenue}
                 </p>
               </div>
             </div>
@@ -265,35 +332,74 @@ const page = () => {
       {/* Listed Products */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Store className="h-5 w-5" />
-            <span>Your Listed Products</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Store className="h-5 w-5" />
+              <span>Your Listed Products</span>
+            </div>
+            <Button
+              onClick={fetchUserProducts}
+              disabled={loading}
+              variant="outline"
+              size="sm"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Refresh"
+              )}
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {listedProducts.map((product) => (
-              <div
-                key={product.id}
-                className="flex items-center space-x-4 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => openProductModal(product)}
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-16 h-16 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">
-                    {product.name}
-                  </h3>
+          {loading && listedProducts.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+              <span className="ml-2 text-gray-600">
+                Loading your products...
+              </span>
+            </div>
+          ) : listedProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">No products listed yet.</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Start selling by adding your first product!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {listedProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="flex items-center space-x-4 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => openProductModal(product)}
+                >
+                  <img
+                    src={
+                      product.images && product.images.length > 0
+                        ? `http://localhost:3030${product.images[0].url}`
+                        : "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop&crop=center"
+                    }
+                    alt={product.name}
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">{product.category}</p>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="font-bold text-gray-900">₹{product.price}</p>
+                    <p className="text-xs text-gray-500">
+                      Listed {new Date(product.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right space-y-1">
-                  <p className="font-bold text-gray-900">₹{product.price}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -325,7 +431,11 @@ const page = () => {
               {/* Product Image */}
               <div className="flex justify-center">
                 <img
-                  src={selectedProduct.image}
+                  src={
+                    selectedProduct.images && selectedProduct.images.length > 0
+                      ? `http://localhost:3030${selectedProduct.images[0].url}`
+                      : "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop&crop=center"
+                  }
                   alt={selectedProduct.name}
                   className="w-full max-w-md h-64 object-cover rounded-lg"
                 />
@@ -337,7 +447,7 @@ const page = () => {
                   <h3 className="text-xl font-semibold text-gray-900">
                     {selectedProduct.name}
                   </h3>
-                  <p className="text-gray-600">{selectedProduct.brand}</p>
+                  <p className="text-gray-600">{selectedProduct.category}</p>
                 </div>
 
                 <div>
@@ -356,13 +466,21 @@ const page = () => {
                       ₹{selectedProduct.price}
                     </p>
                   </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-1">
+                      Listed Date
+                    </h4>
+                    <p className="text-gray-600">
+                      {new Date(selectedProduct.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-4 pt-6 border-t">
                 <Button
-                  onClick={() => deleteProduct(selectedProduct.id)}
+                  onClick={() => deleteProduct(selectedProduct._id)}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -436,4 +554,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default ProfilePage;
